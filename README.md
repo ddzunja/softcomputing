@@ -18,5 +18,5 @@ Umesto `x` upišite broj u intervalu `0-9`.
 
 Primer `python program.py 5` pokreće analizu video klipa sa nazivom `video-5.avi`
 
-Link [test_podaci](https://drive.google.com/drive/folders/0B1ZJXQY32LBUU3FiTS14a3NZd1U)
+Link [test_data](https://drive.google.com/drive/folders/0B1ZJXQY32LBUU3FiTS14a3NZd1U)
 
