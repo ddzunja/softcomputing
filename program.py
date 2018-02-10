@@ -79,7 +79,7 @@ def classify(img, point, classifier):
 
     classifiedNumber = np.argmax(classifier.predict(toPredict)[0])
 
-    cv2.imshow('classifier' + str(counter), cropImage)
+    #cv2.imshow('classifier', cropImage)
 
     return classifiedNumber
 
@@ -113,7 +113,7 @@ def trackObjects(img, linesFinal, classifier):
     img0 = cv2.dilate(img0,kernel)
     img0 = cv2.dilate(img0,kernel)
 
-    cv2.imshow('proba', img0)
+    #cv2.imshow('proba', img0)
     labeled, nr_objects = ndimage.label(img0)
     objects = ndimage.find_objects(labeled)
     for i in range(nr_objects):
