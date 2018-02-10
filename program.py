@@ -4,7 +4,6 @@ import time
 import numpy as np
 import cv2
 import itertools
-from skimage.feature import hog
 from scipy import ndimage
 from vector import distance, pnt2line
 from keras.models import load_model
@@ -51,7 +50,8 @@ def deskew(img):
     # Calculate skew based on central momemts. 
     skew = m['mu11']/m['mu02']
     # Calculate affine transform to correct skewness. 
-    M = np.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
+    #M = np.float32([[1, skew, -0.5*SZ*skew], [0, 1, 0]])
+    M = np.array([[1, skew, -0.5*SZ*skew], [0, 1, 0]], 'float32')
     # Apply affine transform
     img = cv2.warpAffine(img, M, (SZ, SZ), flags=cv2.WARP_INVERSE_MAP | cv2.INTER_LINEAR)
     return img
@@ -97,7 +97,7 @@ def trackObjects(img, linesFinal, classifier):
     global addition
     global t
 
-    kernel = np.ones((2,2),np.uint8)
+    kernel = np.ones((2, 2),np.uint8)
     lower = np.array([230, 230, 230])
     upper = np.array([255, 255, 255])
 
@@ -110,9 +110,10 @@ def trackObjects(img, linesFinal, classifier):
     mask = cv2.inRange(img, lower, upper)    
     img0 = 1.0*mask
 
-    img0 = cv2.dilate(img0,kernel) #cv2.erode(img0,kernel)
+    img0 = cv2.dilate(img0,kernel)
     img0 = cv2.dilate(img0,kernel)
 
+    cv2.imshow('proba', img0)
     labeled, nr_objects = ndimage.label(img0)
     objects = ndimage.find_objects(labeled)
     for i in range(nr_objects):
@@ -292,16 +293,12 @@ def main(vidTitle, classifier, show):
     while(cap.isOpened()):
         ret, frame = cap.read()
 
-        prnStr = '\rAnalyzing ' + vidTitle + ': ' + str(round((frameCounter / (frameCount * 1.0) * 100.0), 2)) + '%, '
+        prnStr = '\rAnalyzing ' + vidTitle + ': ' + str(round((frameCounter / (frameCount * 1.0) * 100.0), 1)) + '%, '
         prnStr += 'Added = ' + str(addArray) + ', '
         prnStr += 'Subtracted = ' + str(subArray)
 
-        print(prnStr, end='   ')
-
-        #print('\rAnalyzing ' + vidTitle + ': ' + str(round((frameCounter / (frameCount * 1.0) * 100.0), 2)) + '%', end=' ')
-        #print('\rAdded = ' + str(addArray), end = '')
-        #print('\rSubtraced = ' + str(subArray), end = '')
-        
+        print(prnStr, end='')
+  
         frameCounter += 1
 
         if ret is True:
