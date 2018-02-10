@@ -37,6 +37,8 @@ counter = 0
 addition = 0
 subtract = 0
 times = []
+subArray = []
+addArray = []
 
 def deskew(img):
     m = cv2.moments(img)
@@ -58,6 +60,8 @@ def classify(img, point, classifier):
 
     x, y = point
 
+    global counter
+
     cropImage = img[y-12:y+12, x-12:x+12]
 
     cropImage = cv2.cvtColor(cropImage, cv2.COLOR_BGR2GRAY)
@@ -65,7 +69,7 @@ def classify(img, point, classifier):
     cropImage = deskew(cropImage)
     
 
-    cropImage = cv2.dilate(cropImage, (3, 3))
+    cropImage = cv2.dilate(cropImage, (4, 4))
 
     cropImage = getAreaOfIntrest(cropImage)
 
@@ -75,7 +79,7 @@ def classify(img, point, classifier):
 
     classifiedNumber = np.argmax(classifier.predict(toPredict)[0])
 
-    #cv2.imshow('classifier', cropImage)
+    cv2.imshow('classifier' + str(counter), cropImage)
 
     return classifiedNumber
 
@@ -166,6 +170,7 @@ def trackObjects(img, linesFinal, classifier):
                         el['passAdd'] = True
                         counter += 1
                         addition += el['number']
+                        addArray.append(el['number'])
 
                 #cv2.circle(img, el['center'], 16, c, 2)
 
@@ -180,6 +185,7 @@ def trackObjects(img, linesFinal, classifier):
                         el['passSub'] = True
                         counter += 1
                         subtract -= el['number']
+                        subArray.append(el['number'])
 
             if passed:
                 cv2.circle(img, el['center'], 16, c, 2)
@@ -191,7 +197,7 @@ def trackObjects(img, linesFinal, classifier):
             if el['number'] is not None:
                 cv2.putText(img, text = str(el['number']), 
                     org = (el['center'][0]+15, el['center'][1]+20), 
-                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 1, color = (0, 0, 255))
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 0.6, color = (0, 0, 255))
             for hist in el['history']:
                 ttt = t-hist['t']
                 if(ttt<100):
@@ -267,6 +273,8 @@ def main(vidTitle, classifier, show):
     global addition
     global subtract
     global times
+    global subArray
+    global addArray
    
 
     print('\n----------------')
@@ -284,7 +292,16 @@ def main(vidTitle, classifier, show):
     while(cap.isOpened()):
         ret, frame = cap.read()
 
-        print('\rAnalyzing ' + vidTitle + ': ' + str(round((frameCounter / (frameCount * 1.0) * 100.0), 2)) + '%', end=' ')
+        prnStr = '\rAnalyzing ' + vidTitle + ': ' + str(round((frameCounter / (frameCount * 1.0) * 100.0), 2)) + '%, '
+        prnStr += 'Added = ' + str(addArray) + ', '
+        prnStr += 'Subtracted = ' + str(subArray)
+
+        print(prnStr, end='   ')
+
+        #print('\rAnalyzing ' + vidTitle + ': ' + str(round((frameCounter / (frameCount * 1.0) * 100.0), 2)) + '%', end=' ')
+        #print('\rAdded = ' + str(addArray), end = '')
+        #print('\rSubtraced = ' + str(subArray), end = '')
+        
         frameCounter += 1
 
         if ret is True:
@@ -297,8 +314,8 @@ def main(vidTitle, classifier, show):
 
             trackObjects(frame, lines, classifier)
               
-            cv2.line(frame, addLine[0], addLine[1], (255, 170, 255), 2)
-            cv2.line(frame, subLine[0], subLine[1], (255, 0, 0), 2)
+            #cv2.line(frame, addLine[0], addLine[1], (255, 170, 255), 2)
+            #cv2.line(frame, subLine[0], subLine[1], (255, 0, 0), 2)
             cv2.putText(frame, text = 'ADD + ', org = addLine[0], fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 0.5, color = (90, 255, 255))
             cv2.putText(frame, text = 'SUB - ', org = subLine[0], fontFace = cv2.FONT_HERSHEY_SIMPLEX, fontScale = 0.5, color = (90, 255, 255)) 
             
@@ -329,6 +346,8 @@ def main(vidTitle, classifier, show):
     addition = 0
     subtract = 0
     times = []
+    subArray = []
+    addArray = []
 
     return sum
 
@@ -348,7 +367,7 @@ model = load_model('model.h5')
 if sys.argv[1] == 'all':
 
     for i in range(0, 10):
-        result = main(vidTitle = sampleArr[i], classifier = model, show = True)
+        result = main(vidTitle = sampleArr[i], classifier = model, show = False)
         resultArray.append(result)
 
     f = open('out.txt', 'w')

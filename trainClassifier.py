@@ -44,7 +44,7 @@ def getAreaOfIntrest(imgToResolve):
     [x, y, w, h] = cv2.boundingRect(contours[contourIndex])
 
     resolvedImg = imgToResolve[y:y+h+1, x:x+w+1]
-    resolvedImg = cv2.resize(resolvedImg, imgToResolve.shape, interpolation=cv2.INTER_AREA)
+    resolvedImg = cv2.resize(resolvedImg, (28, 28), interpolation=cv2.INTER_AREA)
 
     return resolvedImg
 
